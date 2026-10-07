@@ -1,4 +1,5 @@
-// import { useNavigate } from "react-router-dom";
+"use client";
+import { useRouter } from "next/navigation";
 import { Calendar, Clock, Award, CheckCircle2 } from "lucide-react";
 import { Test, TestAttempt } from "../lib/Interface";
 
@@ -8,7 +9,7 @@ interface TestCardProps {
 }
 
 export default function TestCard({ test, attempt }: TestCardProps) {
-  // const navigate = useNavigate();
+  const router = useRouter();
 
   const formatDate = (date: Date) => {
     return date.toLocaleString("en-US", {
@@ -111,16 +112,31 @@ export default function TestCard({ test, attempt }: TestCardProps) {
           </div>
           {!attempt && isActive() && (
             <button
-              // onClick={() => navigate(`/test/${test.id}`)}
+              onClick={() => router.push(`/test/${test.testId || test.id}`)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold text-sm transition-all transform hover:scale-105 active:scale-95 shadow-md shadow-blue-500/30"
             >
               Attempt Test
             </button>
           )}
           {attempt && (
-            <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-semibold text-sm transition-all">
-              View Details
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() =>
+                  router.push(`/test/${test.testId || test.id}/result`)
+                }
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              >
+                Result
+              </button>
+              <button
+                onClick={() =>
+                  router.push(`/test/${test.testId || test.id}?mode=review`)
+                }
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+              >
+                Review
+              </button>
+            </div>
           )}
         </div>
       </div>

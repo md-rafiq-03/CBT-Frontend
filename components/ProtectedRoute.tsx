@@ -1,21 +1,46 @@
-// import { ReactNode } from "react";
-// // import { useAuth } from "../contexts/AuthContext";
-// import Login from "../app/login/page";
+"use client";
 
-// export default function ProtectedRoute({ children }: { children: ReactNode }) {
-//   // const { student, loading } = useAuth();
+import { ReactNode, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { UserRole } from "@/lib/Interface";
 
-//   if (loading) {
-//     return (
-//       <div className="min-h-screen bg-linear-to-br from-blue-50 to-white flex items-center justify-center">
-//         <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
-//       </div>
-//     );
-//   }
+interface ProtectedRouteProps {
+  children: ReactNode;
+  role?: UserRole;
+  loginPath?: string;
+}
 
-//   if (!student) {
-//     return <Login />;
-//   }
+export default function ProtectedRoute({
+  children,
+  role,
+  loginPath = "/login",
+}: ProtectedRouteProps) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
 
-//   return <>{children}</>;
-// }
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      router.replace(loginPath);
+      return;
+    }
+    if (role && user.role !== role) {
+      router.replace(user.role === "ADMIN" ? "/admin" : "/");
+    }
+  }, [user, loading, role, loginPath, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-600">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user || (role && user.role !== role)) {
+    return null;
+  }
+
+  return <>{children}</>;
+}

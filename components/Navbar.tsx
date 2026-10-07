@@ -1,6 +1,9 @@
+"use client";
+
 import { useState } from "react";
 import { BookOpen, User, LogOut, Menu, X } from "lucide-react";
-// import { useAuth } from "../contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../contexts/AuthContext";
 
 interface NavbarProps {
   activeTab: "all" | "active" | "attempted" | "previous";
@@ -8,7 +11,8 @@ interface NavbarProps {
 }
 
 export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
-  // const { student, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -18,6 +22,11 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
     { id: "attempted" as const, label: "Attempted" },
     { id: "previous" as const, label: "Previous" },
   ];
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
@@ -29,7 +38,7 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-gray-900">
-                Excellence Academy
+                Kinematics Classes
               </h1>
               <p className="text-xs text-gray-500">Student Portal</p>
             </div>
@@ -62,13 +71,9 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
                 </div>
                 <div className="hidden sm:block text-left">
                   <p className="text-sm font-semibold text-gray-900">
-                    {/* {student?.full_name} */}
-                    John Doe
+                    {user?.fullName || "Student"}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {/* {student?.roll_number} */}
-                    2025JEE10
-                  </p>
+                  <p className="text-xs text-gray-500">{user?.rollNumber}</p>
                 </div>
               </button>
 
@@ -76,16 +81,12 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="text-sm font-semibold text-gray-900">
-                      {/* {student?.full_name} */}
-                      John Doe
+                      {user?.fullName}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {/* {student?.email || student?.roll_number} */}
-                      2025JEE10
-                    </p>
+                    <p className="text-xs text-gray-500">{user?.rollNumber}</p>
                   </div>
                   <button
-                    // onClick={logout}
+                    onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
                   >
                     <LogOut className="w-4 h-4" />

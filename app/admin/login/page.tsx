@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginShell from "@/components/LoginShell";
 
-export default function StudentLoginPage() {
+export default function AdminLoginPage() {
   const [rollNumber, setRollNumber] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -15,11 +15,8 @@ export default function StudentLoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!authLoading && user?.role === "STUDENT") {
-      router.replace("/");
-    }
     if (!authLoading && user?.role === "ADMIN") {
-      router.replace("/admin/test");
+      router.replace("/admin");
     }
   }, [user, authLoading, router]);
 
@@ -27,21 +24,21 @@ export default function StudentLoginPage() {
     e.preventDefault();
     setError("");
     setLoading(true);
-    const result = await login(rollNumber.trim(), password, "STUDENT");
+    const result = await login(rollNumber.trim(), password, "ADMIN");
     setLoading(false);
     if (!result.success) {
       setError(result.error || "Login failed");
       return;
     }
-    router.push("/");
+    router.push("/admin");
   };
 
   return (
     <LoginShell
-      title="Student Login"
-      subtitle="Enter your roll number to access tests"
-      bannerTitle="Kinematics Classes"
-      bannerSubtitle="Student portal for JEE mock tests and practice"
+      title="Admin Login"
+      subtitle="Manage tests and questions"
+      bannerTitle="Admin Portal"
+      bannerSubtitle="Create tests, upload questions, and review student activity"
       rollNumber={rollNumber}
       password={password}
       error={error}
@@ -51,10 +48,10 @@ export default function StudentLoginPage() {
       onSubmit={handleSubmit}
       hint={
         <p>
-          Dev student: roll <strong>200</strong>, password <strong>-200</strong>
+          Dev admin: roll <strong>100</strong>, password <strong>-100</strong>
           <br />
-          <Link href="/admin/login" className="text-blue-600 hover:underline">
-            Admin login
+          <Link href="/login" className="text-blue-600 hover:underline">
+            Student login
           </Link>
         </p>
       }

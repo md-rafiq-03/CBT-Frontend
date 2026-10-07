@@ -6,6 +6,103 @@ export interface Student {
   created_at: string;
 }
 
+export type UserRole = "ADMIN" | "STUDENT";
+
+export interface AuthUser {
+  token: string;
+  userId: string;
+  rollNumber: string;
+  fullName: string;
+  role: UserRole;
+}
+
+export interface LoginResponse extends AuthUser {}
+
+export interface UserDirectoryItem {
+  userId: string;
+  rollNumber: string;
+  fullName: string;
+  role: UserRole;
+}
+
+export interface SubmissionPerQuestion {
+  questionId: string;
+  type: "MCQ" | "INTEGER";
+  submittedValue: string;
+}
+
+export interface Submission {
+  id?: string;
+  submissionId?: string;
+  userId: string;
+  testId: string;
+  submissionPerQuestionList: SubmissionPerQuestion[];
+  startedAt: number;
+  endTime: number;
+  cheatFlag: boolean;
+  score: number;
+}
+
+export interface SubmissionPayload {
+  userId: string;
+  testId: string;
+  submissionPerQuestionList: SubmissionPerQuestion[];
+  startedAt: number;
+  endTime: number;
+  cheatFlag: boolean;
+  score: number;
+}
+
+export interface SectionAnalysis {
+  section: string;
+  totalQuestions: number;
+  correctCount: number;
+  wrongCount: number;
+  unansweredCount: number;
+  marksObtained: number;
+  maxMarks: number;
+}
+
+export interface QuestionAnalysis {
+  questionId: string;
+  section: string;
+  type: string;
+  stem: string;
+  submittedValue: string;
+  correctAnswer: string | null;
+  correct: boolean | null;
+  answered: boolean;
+  marksAwarded: number;
+  maxMarks: number;
+  negativeMarks: number;
+}
+
+export interface AttemptAnalysis {
+  submissionId: string;
+  userId: string;
+  testId: string;
+  testName: string;
+  score: number;
+  maxMarks: number;
+  startedAt: number;
+  endTime: number;
+  timeTakenMs: number;
+  totalQuestions: number;
+  correctCount: number;
+  wrongCount: number;
+  unansweredCount: number;
+  sections: SectionAnalysis[];
+  questions: QuestionAnalysis[];
+}
+
+/** Section metadata on a Test (not the same as question Section enum). */
+export interface TestSection {
+  name: string;
+  count: number;
+  mcqType: number;
+  integerType: number;
+}
+
 export interface Test {
   // API-provided identifiers
   id: string;
@@ -16,8 +113,8 @@ export interface Test {
   description?: string;
 
   // Questions / sections
-  totalQuestions?: number;
-  sections?: Section[];
+  totalQuestions?: number | string;
+  sections?: TestSection[];
 
   // Scoring
   negativeMarking?: NegativeMarking;
@@ -40,6 +137,22 @@ export interface NegativeMarking {
   perWrong: number;
 }
 
+/** Payload for POST /api/v1/tests (server overwrites testId/createdAt). */
+export interface CreateTestPayload {
+  testId?: string;
+  testName: string;
+  totalQuestions: string;
+  sections: TestSection[];
+  negativeMarking?: NegativeMarking;
+  durationInMins: number;
+  maxMarks: number;
+  passingMarks?: number;
+  active: boolean;
+  shuffleQuestions?: boolean;
+  startAt: number;
+  expireAt: number;
+}
+
 export interface TestAttempt {
   id: string;
   student_id: string;
@@ -54,7 +167,7 @@ export interface Question {
   id?: string;
   questionId?: string;
   testId: string;
-  section: string; // enum
+  section: Section; // enum
   type: Type; // enum
   stem: string;
   attachments?: string[];
@@ -67,11 +180,11 @@ export interface Question {
   modifiedAt?: string;
 }
 
-export interface Section {
-  count: number,
-  integerType: number,
-  name: string,
-  mcqType: number
+export enum Section {
+  PHYSICS = "PHYSICS",
+  CHEMISTRY = "CHEMISTRY",
+  MATHS = "MATHS",
+  BIOLOGY = "BIOLOGY",
 }
 
 export enum Type {
@@ -92,6 +205,8 @@ export interface CorrectAnswer {
 
 export interface QuestionAttachment {
   url: string;
+  type: string;
+  description?: string;
 }
 
 export interface QuestionOption {

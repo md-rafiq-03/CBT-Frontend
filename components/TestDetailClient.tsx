@@ -43,7 +43,15 @@ export default function TestDetailClient() {
           <div className="text-gray-700 mb-1">Active: {test.active ? "Yes" : "No"}</div>
           <div className="text-gray-700 mb-1">Total Questions: {test.totalQuestions}</div>
           {test.sections && (
-            <div className="text-gray-700 mb-1">Sections: {test.sections.map((s: any) => s.name).join(", ")}</div>
+            <div className="text-gray-700 mb-1">
+              Sections:{" "}
+              {test.sections
+                .map(
+                  (s: { name: string; count?: number; mcqType?: number; integerType?: number }) =>
+                    `${s.name} (${s.count ?? 0}: ${s.mcqType ?? 0} MCQ + ${s.integerType ?? 0} INT)`
+                )
+                .join(", ")}
+            </div>
           )}
         </div>
       )}

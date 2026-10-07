@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createContext,
   useContext,
@@ -5,64 +7,117 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { Student } from "../lib/Interface";
+import { AuthUser, UserRole } from "../lib/Interface";
+import { loginApi, logoutApi, meApi } from "../lib/authApi";
+import { AUTH_STORAGE_KEY } from "../lib/apiClient";
 
 interface AuthContextType {
-  student: Student | null;
+  user: AuthUser | null;
   loading: boolean;
   login: (
     rollNumber: string,
-    password: string
+    password: string,
+    expectedRole?: UserRole
   ) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [student, setStudent] = useState<Student | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const studentData = localStorage.getItem("cbt_student");
-    if (studentData) {
-      // setStudent(JSON.parse(studentData));
-    }
-    // setLoading(false);
+    const restore = async () => {
+      try {
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (!raw) return;
+
+        const saved = JSON.parse(raw) as AuthUser;
+        if (!saved?.token) {
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+          return;
+        }
+
+        // Keep token available for apiClient while validating
+        setUser(saved);
+        try {
+          const me = await meApi();
+          const refreshed: AuthUser = {
+            token: saved.token,
+            userId: me.userId,
+            rollNumber: me.rollNumber,
+            fullName: me.fullName,
+            role: me.role,
+          };
+          setUser(refreshed);
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(refreshed));
+        } catch {
+          // Backend restarted or token expired — force re-login
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+          setUser(null);
+        }
+      } catch {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restore();
   }, []);
 
-  const login = async (rollNumber: string, password: string) => {
+  const login = async (
+    rollNumber: string,
+    password: string,
+    expectedRole?: UserRole
+  ) => {
     try {
-      // const { data, error } = await supabase
-      //   .from("students")
-      //   .select("id, roll_number, full_name, email, created_at")
-      //   .eq("roll_number", rollNumber)
-      //   .eq("password", password)
-      //   .maybeSingle();
-
-      // if (error) {
-      //   return { success: false, error: "Login failed. Please try again." };
-      // }
-
-      // if (!data) {
-      //   return { success: false, error: "Invalid roll number or password." };
-      // }
-
-      // setStudent(data);
-      // localStorage.setItem("cbt_student", JSON.stringify(data));
+      const data = await loginApi(rollNumber, password);
+      if (expectedRole && data.role !== expectedRole) {
+        return {
+          success: false,
+          error:
+            expectedRole === "ADMIN"
+              ? "This account is not an admin. Use student login."
+              : "This account is not a student. Use admin login.",
+        };
+      }
+      const authUser: AuthUser = {
+        token: data.token,
+        userId: data.userId,
+        rollNumber: data.rollNumber,
+        fullName: data.fullName,
+        role: data.role,
+      };
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUser));
+      setUser(authUser);
       return { success: true };
-    } catch (err) {
-      return { success: false, error: "An error occurred. Please try again." };
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data ||
+        "Invalid roll number or password.";
+      return {
+        success: false,
+        error: typeof msg === "string" ? msg : "Login failed. Please try again.",
+      };
     }
   };
 
-  const logout = () => {
-    setStudent(null);
-    localStorage.removeItem("cbt_student");
+  const logout = async () => {
+    try {
+      await logoutApi();
+    } finally {
+      setUser(null);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ student, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

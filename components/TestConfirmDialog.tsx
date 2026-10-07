@@ -36,7 +36,7 @@ export default function TestConfirmDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-xs text-gray-600 mb-1">Duration</p>
-              <p className="text-2xl font-bold text-blue-600">{duration}h</p>
+              <p className="text-2xl font-bold text-blue-600">{duration}m</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
               <p className="text-xs text-gray-600 mb-1">Questions</p>
