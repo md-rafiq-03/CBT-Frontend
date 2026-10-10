@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, User, LogOut, Menu, X } from "lucide-react";
+import { BookOpen, User, LogOut, Menu, X, KeyRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -85,6 +85,16 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
                     </p>
                     <p className="text-xs text-gray-500">{user?.rollNumber}</p>
                   </div>
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      router.push("/account/password?portal=student");
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  >
+                    <KeyRound className="w-4 h-4" />
+                    <span>Change password</span>
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"

@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { UserRole } from "@/lib/Interface";
+import { passwordPath, portalFromRole } from "@/lib/authPaths";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -25,6 +26,10 @@ export default function ProtectedRoute({
       router.replace(loginPath);
       return;
     }
+    if (user.mustChangePassword) {
+      router.replace(passwordPath(portalFromRole(user.role)));
+      return;
+    }
     if (role && user.role !== role) {
       router.replace(user.role === "ADMIN" ? "/admin" : "/");
     }
@@ -38,7 +43,7 @@ export default function ProtectedRoute({
     );
   }
 
-  if (!user || (role && user.role !== role)) {
+  if (!user || user.mustChangePassword || (role && user.role !== role)) {
     return null;
   }
 

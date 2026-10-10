@@ -14,15 +14,31 @@ export interface AuthUser {
   rollNumber: string;
   fullName: string;
   role: UserRole;
+  mustChangePassword: boolean;
 }
 
 export interface LoginResponse extends AuthUser {}
+
+export interface MeResponse {
+  userId: string;
+  rollNumber: string;
+  fullName: string;
+  role: UserRole;
+  mustChangePassword: boolean;
+}
 
 export interface UserDirectoryItem {
   userId: string;
   rollNumber: string;
   fullName: string;
   role: UserRole;
+}
+
+export interface CreateStudentRequest {
+  fullName: string;
+  rollNumber: string;
+  dob: string;
+  email: string;
 }
 
 export interface SubmissionPerQuestion {

@@ -10,6 +10,7 @@ import {
   LogOut,
   Home,
   BookOpen,
+  KeyRound,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -27,7 +28,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   const handleLogout = async () => {
     await logout();
-    router.push("/admin/login");
+    router.push("/login");
   };
 
   const isActive = (href: string, exact?: boolean) => {
@@ -82,6 +83,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           >
             <Home className="w-4 h-4" />
             Student Home
+          </Link>
+          <Link
+            href="/account/password?portal=admin"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-800"
+          >
+            <KeyRound className="w-4 h-4" />
+            Change password
           </Link>
           <button
             onClick={handleLogout}

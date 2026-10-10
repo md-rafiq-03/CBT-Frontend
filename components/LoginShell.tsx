@@ -12,6 +12,7 @@ interface LoginShellProps {
   rollNumber: string;
   password: string;
   error: string;
+  notice?: string;
   loading: boolean;
   onRollNumberChange: (v: string) => void;
   onPasswordChange: (v: string) => void;
@@ -27,6 +28,7 @@ export default function LoginShell({
   rollNumber,
   password,
   error,
+  notice,
   loading,
   onRollNumberChange,
   onPasswordChange,
@@ -69,7 +71,7 @@ export default function LoginShell({
                   htmlFor="rollNumber"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Roll Number
+                  Username
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -81,7 +83,7 @@ export default function LoginShell({
                     value={rollNumber}
                     onChange={(e) => onRollNumberChange(e.target.value)}
                     className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Enter roll number"
+                    placeholder="Enter your username"
                     required
                   />
                 </div>
@@ -109,6 +111,12 @@ export default function LoginShell({
                   />
                 </div>
               </div>
+
+              {notice && (
+                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
+                  {notice}
+                </div>
+              )}
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
