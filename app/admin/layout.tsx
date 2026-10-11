@@ -16,7 +16,7 @@ export default function AdminLayout({
   }
 
   return (
-    <ProtectedRoute role="ADMIN" loginPath="/admin/login">
+    <ProtectedRoute role="ADMIN" loginPath="/login">
       <AdminShell>{children}</AdminShell>
     </ProtectedRoute>
   );

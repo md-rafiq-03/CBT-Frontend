@@ -21,7 +21,7 @@ import {
 } from "@/lib/Interface";
 import { useAuth } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import TestConfirmDialog from "@/components/TestConfirmDialog";
+import TestInstructions from "@/components/TestInstructions";
 import TestTimer from "@/components/TestTimer";
 import QuestionDisplay from "@/components/QuestionDisplay";
 import QuestionGrid from "@/components/QuestionGrid";
@@ -303,15 +303,16 @@ function TestAttemptInner() {
 
   if (phase === "confirm") {
     return (
-      <TestConfirmDialog
+      <TestInstructions
         testName={test.testName || "Untitled Test"}
-        duration={test.durationInMins || 0}
+        durationMinutes={test.durationInMins || 0}
         totalQuestions={Number(test.totalQuestions) || questions.length || 0}
-        onConfirm={() => {
+        sections={sections}
+        onProceed={() => {
           setStartedAt(Date.now());
           setPhase("in_progress");
         }}
-        onCancel={() => router.push("/")}
+        onBack={() => router.push("/")}
       />
     );
   }

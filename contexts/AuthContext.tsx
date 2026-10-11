@@ -9,6 +9,7 @@ import {
 } from "react";
 import { AuthUser, UserRole } from "../lib/Interface";
 import { loginApi, logoutApi, meApi } from "../lib/authApi";
+import { apiErrorMessage } from "../lib/apiError";
 import { AUTH_STORAGE_KEY } from "../lib/apiClient";
 
 interface AuthContextType {
@@ -16,9 +17,13 @@ interface AuthContextType {
   loading: boolean;
   login: (
     rollNumber: string,
-    password: string,
-    expectedRole?: UserRole
-  ) => Promise<{ success: boolean; error?: string }>;
+    password: string
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    mustChangePassword?: boolean;
+    role?: UserRole;
+  }>;
   logout: () => Promise<void>;
 }
 
@@ -41,7 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Keep token available for apiClient while validating
-        setUser(saved);
+        setUser({
+          ...saved,
+          mustChangePassword: Boolean(saved.mustChangePassword),
+        });
         try {
           const me = await meApi();
           const refreshed: AuthUser = {
@@ -50,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             rollNumber: me.rollNumber,
             fullName: me.fullName,
             role: me.role,
+            mustChangePassword: Boolean(me.mustChangePassword),
           };
           setUser(refreshed);
           localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(refreshed));
@@ -69,40 +78,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     restore();
   }, []);
 
-  const login = async (
-    rollNumber: string,
-    password: string,
-    expectedRole?: UserRole
-  ) => {
+  const login = async (rollNumber: string, password: string) => {
     try {
       const data = await loginApi(rollNumber, password);
-      if (expectedRole && data.role !== expectedRole) {
-        return {
-          success: false,
-          error:
-            expectedRole === "ADMIN"
-              ? "This account is not an admin. Use student login."
-              : "This account is not a student. Use admin login.",
-        };
-      }
       const authUser: AuthUser = {
         token: data.token,
         userId: data.userId,
         rollNumber: data.rollNumber,
         fullName: data.fullName,
         role: data.role,
+        mustChangePassword: Boolean(data.mustChangePassword),
       };
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authUser));
       setUser(authUser);
-      return { success: true };
-    } catch (err: any) {
-      const msg =
-        err?.response?.data?.message ||
-        err?.response?.data ||
-        "Invalid roll number or password.";
+      return {
+        success: true,
+        mustChangePassword: authUser.mustChangePassword,
+        role: authUser.role,
+      };
+    } catch (err: unknown) {
       return {
         success: false,
-        error: typeof msg === "string" ? msg : "Login failed. Please try again.",
+        error: apiErrorMessage(err, "Invalid username or password."),
       };
     }
   };

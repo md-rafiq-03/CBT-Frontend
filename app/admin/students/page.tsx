@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { getStudents } from "@/lib/authApi";
+import CreateStudentForm from "@/components/CreateStudentForm";
 import { getTests } from "@/lib/testApi";
 import { getAllSubmissions } from "@/lib/submissionApi";
 import { Submission, Test, UserDirectoryItem } from "@/lib/Interface";
@@ -41,6 +42,12 @@ export default function AdminStudentsPage() {
           Click a given test to open detailed analysis
         </p>
       </div>
+
+      <CreateStudentForm
+        onCreated={() => {
+          getStudents().then((next) => setStudents(next || []));
+        }}
+      />
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <table className="w-full text-sm">
