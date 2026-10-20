@@ -20,8 +20,8 @@ export default function Footer() {
                 <BookOpen className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-bold">Excellence Academy</h3>
-                <p className="text-sm text-gray-400">Education Excellence</p>
+                <h3 className="text-xl font-bold">Kinematics Classes</h3>
+                <p className="text-sm text-gray-400">CBT Portal</p>
               </div>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
@@ -76,7 +76,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-blue-500 shrink-0" />
-                <span>info@excellenceacademy.com</span>
+                <span>info@kinematicsclasses.com</span>
               </li>
             </ul>
           </div>
@@ -121,7 +121,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
           <p>
-            &copy; {new Date().getFullYear()} Excellence Academy. All rights
+            &copy; {new Date().getFullYear()} Kinematics Classes. All rights
             reserved.
           </p>
         </div>

@@ -47,6 +47,10 @@ export default function PasswordResetPage() {
     setSubmitting(true);
     try {
       const message = await requestPasswordCode(roll);
+      if (message.startsWith("Attempt limit reached")) {
+        setError(message);
+        return;
+      }
       setRollNumber(roll);
       setInfo(message);
       setStep("confirm");
@@ -103,25 +107,28 @@ export default function PasswordResetPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="bg-blue-700 text-white text-center py-2 text-sm font-medium tracking-wide">
-        Kinematics Classes CBT — Password
-      </div>
+    <div className="bg-gray-50 text-neutral-900" style={{ colorScheme: "light" }}>
+      <section className="flex min-h-screen flex-col">
+        <div className="bg-blue-600 text-white text-center py-2 text-sm font-medium tracking-wide">
+          Kinematics Classes CBT — Password
+        </div>
 
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
-          <div className="mb-6 flex items-center gap-3">
+        <div className={`flex flex-1 items-center justify-center ${step === "confirm" ? "px-6 py-4" : "p-8"}`}>
+        <div className={`w-full max-w-md bg-white border border-gray-200 rounded-2xl shadow-sm ${step === "confirm" ? "p-5" : "p-8"}`}>
+          <div className={`${step === "confirm" ? "mb-4" : "mb-6"} flex items-center gap-3`}>
             <div className="bg-blue-100 p-2 rounded-lg">
-              <KeyRound className="w-5 h-5 text-blue-700" />
+              <KeyRound className="w-5 h-5 text-blue-600" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 {forced ? "Set a new password" : "Change password"}
               </h1>
               <p className="text-sm text-gray-600">
-                {forced
-                  ? "Your first password was your date of birth. We will email a code so you can replace it."
-                  : "We email a one-time code to the address on this account. You will sign in again after it is updated."}
+                {step === "confirm" && info
+                  ? info
+                  : forced
+                    ? "Your first password was your date of birth. We will email a code so you can replace it."
+                    : "We email a one-time code to the address on this account. You will sign in again after it is updated."}
               </p>
             </div>
           </div>
@@ -139,7 +146,7 @@ export default function PasswordResetPage() {
                   disabled={Boolean(user)}
                   maxLength={32}
                   required
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none disabled:bg-gray-100"
+                  className="block w-full bg-white px-3 py-3 border border-gray-300 rounded-lg text-base text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-blue-600 focus:border-transparent disabled:bg-gray-100 disabled:text-neutral-900"
                   placeholder="Enter your username"
                 />
               </div>
@@ -154,10 +161,9 @@ export default function PasswordResetPage() {
               </button>
             </form>
           ) : (
-            <form onSubmit={confirmChange} className="space-y-5">
-              {info && <StatusBanner tone="info" text={info} />}
+            <form onSubmit={confirmChange} className="space-y-3">
               <div>
-                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
                   Code
                 </label>
                 <input
@@ -168,12 +174,12 @@ export default function PasswordResetPage() {
                   onChange={(event) => setOtp(event.target.value)}
                   maxLength={6}
                   required
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg tracking-widest focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="block w-full bg-white px-3 py-2 border border-gray-300 rounded-lg text-base text-neutral-900 tracking-widest outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   placeholder="6-digit code"
                 />
               </div>
               <div>
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
                   New password
                 </label>
                 <input
@@ -184,12 +190,12 @@ export default function PasswordResetPage() {
                   minLength={8}
                   maxLength={72}
                   required
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="block w-full bg-white px-3 py-2 border border-gray-300 rounded-lg text-base text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   placeholder="8 to 72 characters"
                 />
               </div>
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                   Confirm password
                 </label>
                 <input
@@ -200,7 +206,7 @@ export default function PasswordResetPage() {
                   minLength={8}
                   maxLength={72}
                   required
-                  className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  className="block w-full bg-white px-3 py-2 border border-gray-300 rounded-lg text-base text-neutral-900 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                 />
               </div>
               <p className="text-xs text-gray-500">
@@ -210,7 +216,7 @@ export default function PasswordResetPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg disabled:opacity-50"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg disabled:opacity-50"
               >
                 {submitting ? "Updating..." : "Update password"}
               </button>
@@ -232,7 +238,7 @@ export default function PasswordResetPage() {
             </form>
           )}
 
-          <div className="mt-6 flex items-center justify-between text-sm">
+          <div className={`${step === "confirm" ? "mt-4" : "mt-6"} flex items-center justify-between text-sm`}>
             {user ? (
               <button onClick={handleLogout} className="text-red-600 hover:underline">
                 Logout
@@ -249,7 +255,8 @@ export default function PasswordResetPage() {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </section>
       <Footer />
     </div>
   );

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   Question,
   QuestionOption,
@@ -46,6 +49,7 @@ export default function QuestionDisplay({
   isReviewMode = false,
   isMarkedForReview = false,
 }: QuestionDisplayProps) {
+  const [zoomedSrc, setZoomedSrc] = useState<string | null>(null);
   const correctKey = question.correctAnswer?.answer || "";
 
   const handleIntegerChange = (value: string) => {
@@ -128,19 +132,21 @@ export default function QuestionDisplay({
           </p>
 
           {attachments.length > 0 && (
-            <div className="space-y-4">
+            <div className="flex flex-wrap gap-3">
               {attachments.map((attachment) => (
-                <div
+                <button
                   key={attachment.url}
-                  className="bg-gray-50 rounded-lg overflow-hidden"
+                  type="button"
+                  onClick={() => setZoomedSrc(attachment.url)}
+                  className="bg-gray-50 rounded-lg overflow-hidden w-[min(100%,18rem)] sm:w-72 cursor-zoom-in text-left"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={attachment.url}
                     alt="Question attachment"
-                    className="w-full h-auto max-h-96 object-contain"
+                    className="w-full h-auto max-h-44 object-contain"
                   />
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -169,7 +175,7 @@ export default function QuestionDisplay({
                       disabled={readOnly}
                       className="mt-1 w-5 h-5 text-blue-600"
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 space-y-2">
                       {option.text && (
                         <p className="text-gray-900 font-medium">
                           {option.text}
@@ -180,6 +186,24 @@ export default function QuestionDisplay({
                               </span>
                             )}
                         </p>
+                      )}
+                      {option.image && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setZoomedSrc(option.image!);
+                          }}
+                          className="bg-gray-50 rounded-lg overflow-hidden w-[min(100%,10rem)] sm:w-40 cursor-zoom-in text-left"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={option.image}
+                            alt={`Option ${option.optionId}`}
+                            className="w-full h-auto max-h-28 object-contain"
+                          />
+                        </button>
                       )}
                     </div>
                   </div>
@@ -297,6 +321,23 @@ export default function QuestionDisplay({
           </div>
         )}
       </div>
+
+      {zoomedSrc && (
+        <button
+          type="button"
+          aria-label="Close zoomed image"
+          onClick={() => setZoomedSrc(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 cursor-zoom-out"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={zoomedSrc}
+            alt="Zoomed"
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-[min(90vw,36rem)] max-h-[70vh] w-auto h-auto object-contain rounded-lg shadow-xl bg-white"
+          />
+        </button>
+      )}
     </div>
   );
 }
