@@ -56,10 +56,8 @@ export default function StudentLoginPage() {
 
   return (
     <LoginShell
-      title="Login"
-      subtitle="Students and admins sign in here"
-      bannerTitle="Kinematics Classes"
-      bannerSubtitle="Sign in to tests, results, and the admin console"
+      title="Welcome"
+      subtitle="Sign in with your roll number"
       rollNumber={rollNumber}
       password={password}
       error={error}

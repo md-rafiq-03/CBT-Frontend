@@ -3,6 +3,7 @@
 import { FormEvent, ReactNode, useState } from "react";
 import { createStudent } from "@/lib/authApi";
 import { apiErrorMessage } from "@/lib/apiError";
+import { fieldClassSm as inputClass } from "@/lib/formStyles";
 
 export default function CreateStudentForm({
   onCreated,
@@ -118,9 +119,6 @@ export default function CreateStudentForm({
     </form>
   );
 }
-
-const inputClass =
-  "w-full px-3 py-2 border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500";
 
 function Field({
   label,

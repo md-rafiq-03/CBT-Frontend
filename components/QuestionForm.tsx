@@ -10,6 +10,7 @@ import {
   Test,
 } from "@/lib/Interface";
 import { X, Plus, Trash2 } from "lucide-react";
+import { fieldClass, fieldClassSm } from "@/lib/formStyles";
 
 interface QuestionFormProps {
   initialData?: Question;
@@ -37,7 +38,7 @@ export default function QuestionForm({
   const [formData, setFormData] = useState<Omit<Question, "id" | "questionId">>(
     initialData || {
       testId: "",
-      section:  "Physics",
+      section: Section.PHYSICS,
       type: "MCQ" as Type,
       stem: "",
       marks: 4,
@@ -212,7 +213,10 @@ export default function QuestionForm({
     }
 
     try {
-      await onSubmit(formData);
+      await onSubmit({
+        ...formData,
+        section: String(formData.section).toUpperCase() as Section,
+      });
     } catch (err: any) {
       setError(err.message || "Failed to save question");
     }
@@ -235,7 +239,7 @@ export default function QuestionForm({
           name="testId"
           value={formData.testId}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={fieldClass}
           required
         >
           <option value="">Select a test</option>
@@ -261,7 +265,7 @@ export default function QuestionForm({
               section: e.target.value,
             }))
           }
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={fieldClass}
           required
         >
           <option value="PHYSICS">PHYSICS</option>
@@ -279,7 +283,7 @@ export default function QuestionForm({
           name="type"
           value={formData.type}
           onChange={handleChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={fieldClass}
         >
           <option value="MCQ">Multiple Choice (MCQ)</option>
           <option value="INTEGER">Integer Type</option>
@@ -297,7 +301,7 @@ export default function QuestionForm({
           onChange={handleChange}
           placeholder="Enter the question text..."
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={fieldClass}
           required
         />
       </div>
@@ -315,7 +319,7 @@ export default function QuestionForm({
               const file = e.target.files?.[0];
               if (file) handleAttachmentFile(file);
             }}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`flex-1 ${fieldClass}`}
           />
         </div>
         <div className="space-y-2">
@@ -358,7 +362,7 @@ export default function QuestionForm({
                       handleOptionChange(idx, "text", e.target.value)
                     }
                     placeholder={`Option ${idx + 1}`}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={fieldClass}
                   />
                   <input
                     type="file"
@@ -367,7 +371,7 @@ export default function QuestionForm({
                       const file = e.target.files?.[0];
                       if (file) handleOptionImageFile(idx, file);
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className={fieldClassSm}
                   />
                   {option.image && (
                     <img
@@ -435,7 +439,7 @@ export default function QuestionForm({
             name="marks"
             value={formData.marks}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={fieldClass}
             required
           />
         </div>
@@ -448,7 +452,7 @@ export default function QuestionForm({
             name="negativeMarks"
             value={formData.negativeMarks}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={fieldClass}
             required
           />
         </div>
@@ -463,7 +467,7 @@ export default function QuestionForm({
               value={formData.tolerance || 0}
               onChange={handleChange}
               step="0.01"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={fieldClass}
             />
           </div>
         )}
@@ -482,7 +486,7 @@ export default function QuestionForm({
             value={formData.correctAnswer?.answer || ""}
             onChange={handleCorrectAnswerChange}
             placeholder="Enter correct answer value"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+            className={`${fieldClass} mb-2`}
           />
         )}
         <textarea
@@ -491,7 +495,7 @@ export default function QuestionForm({
           onChange={handleCorrectAnswerChange}
           placeholder="Explanation (optional)"
           rows={2}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+          className={`${fieldClass} mb-2`}
         />
         <div className="flex gap-2 mb-2">
           <input
@@ -501,7 +505,7 @@ export default function QuestionForm({
               const file = e.target.files?.[0];
               if (file) handleCorrectAttachmentFile(file);
             }}
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`flex-1 ${fieldClass}`}
           />
           <div className="space-y-2">
             {(formData.correctAnswer?.attachments || []).map((url, idx) => (

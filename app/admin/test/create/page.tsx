@@ -10,10 +10,9 @@ import {
   TestSection,
 } from "@/lib/Interface";
 import { ArrowLeft } from "lucide-react";
+import { fieldClass as inputClass } from "@/lib/formStyles";
 
 const SECTION_OPTIONS = ["PHYSICS", "CHEMISTRY", "MATHS", "BIOLOGY"] as const;
-const inputClass =
-  "w-full px-3 py-2.5 border border-slate-200 rounded-lg outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20";
 
 const emptySection = (): TestSection => ({
   name: "PHYSICS",

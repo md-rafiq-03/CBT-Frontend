@@ -11,6 +11,7 @@ import {
 import { getTests } from "@/lib/testApi";
 import QuestionDialog from "@/components/QuestionDialog";
 import { Plus, Trash2, Edit2, Search } from "lucide-react";
+import { fieldClass } from "@/lib/formStyles";
 
 export default function QuestionsPage() {
   const [tests, setTests] = useState<Test[]>([]);
@@ -133,13 +134,13 @@ export default function QuestionsPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search stem or section..."
-            className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20"
+            className={`${fieldClass} pl-9`}
           />
         </div>
         <select
           value={filterTestId}
           onChange={(e) => setFilterTestId(e.target.value)}
-          className="px-3 py-2.5 border border-slate-200 rounded-lg"
+          className={fieldClass}
         >
           <option value="">All Tests</option>
           {tests.map((test) => (
@@ -151,7 +152,7 @@ export default function QuestionsPage() {
         <select
           value={filterSection}
           onChange={(e) => setFilterSection(e.target.value)}
-          className="px-3 py-2.5 border border-slate-200 rounded-lg"
+          className={fieldClass}
         >
           <option value="">All Sections</option>
           {uniqueSections.map((section) => (

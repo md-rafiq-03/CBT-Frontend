@@ -1,14 +1,49 @@
 "use client";
 
-import { FormEvent, ReactNode } from "react";
-import { BookOpen, Lock, User } from "lucide-react";
+import {
+  FormEvent,
+  ReactNode,
+  TransitionEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Footer from "@/components/Footer";
+import {
+  LearnArt,
+  PerformanceArt,
+  ResultArt,
+  TimetableArt,
+} from "@/components/LoginSlideArt";
+import { fieldClass } from "@/lib/formStyles";
+
+const SLIDES = [
+  {
+    title: "Time table & Attendance",
+    text: "See your class schedule and attendance in one place.",
+    Art: TimetableArt,
+  },
+  {
+    title: "Performance check with error analysis.",
+    text: "Review your score and the questions you missed.",
+    Art: PerformanceArt,
+  },
+  {
+    title: "Instant result with subjectwise marks and Rank",
+    text: "Subject marks and rank are available as soon as the test ends.",
+    Art: ResultArt,
+  },
+  {
+    title: "Learn, Practice & Achieve.",
+    text: "Practice tests, then see what to work on next.",
+    Art: LearnArt,
+  },
+] as const;
 
 interface LoginShellProps {
   title: string;
   subtitle: string;
-  bannerTitle: string;
-  bannerSubtitle: string;
   rollNumber: string;
   password: string;
   error: string;
@@ -23,8 +58,6 @@ interface LoginShellProps {
 export default function LoginShell({
   title,
   subtitle,
-  bannerTitle,
-  bannerSubtitle,
   rollNumber,
   password,
   error,
@@ -36,111 +69,198 @@ export default function LoginShell({
   hint,
 }: LoginShellProps) {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <div className="bg-blue-700 text-white text-center py-2 text-sm font-medium tracking-wide">
-        Kinematics Classes CBT — Secure Login
-      </div>
+    <div className="bg-white text-neutral-900" style={{ colorScheme: "light" }}>
+      <section className="flex min-h-screen flex-col lg:h-screen lg:min-h-0 lg:flex-row">
+        <LoginSlides />
+        <div className="relative flex min-h-[58vh] flex-1 items-center justify-center px-6 py-16 lg:min-h-0 lg:px-12">
+          <img
+            src="/dsss-logo.jpg"
+            alt="Kinematics Classes"
+            className="absolute top-6 right-6 h-16 w-16 object-contain sm:h-20 sm:w-20"
+          />
+          <div className="w-full max-w-sm">
+            <h1 className="text-2xl font-semibold text-neutral-900">{title}</h1>
+            <p className="mt-1 text-sm text-neutral-600">{subtitle}</p>
 
-      <div className="flex-1 flex flex-col lg:flex-row">
-        <div className="lg:w-1/2 bg-linear-to-br from-blue-600 via-blue-500 to-blue-400 relative overflow-hidden flex items-center justify-center p-8">
-          <div className="relative z-10 text-white text-center max-w-md">
-            <div className="mb-8 flex justify-center">
-              <div className="bg-white/20 backdrop-blur-lg p-6 rounded-3xl shadow-2xl">
-                <BookOpen className="w-20 h-20 text-white" strokeWidth={1.5} />
-              </div>
-            </div>
-            <h1 className="text-4xl sm:text-5xl font-bold mb-4 tracking-tight">
-              {bannerTitle}
-            </h1>
-            <p className="text-lg text-blue-100 leading-relaxed">
-              {bannerSubtitle}
-            </p>
-          </div>
-        </div>
-
-        <div className="lg:w-1/2 flex items-center justify-center p-8 bg-white">
-          <div className="w-full max-w-md">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">{title}</h2>
-              <p className="text-gray-600">{subtitle}</p>
-            </div>
-
-            <form onSubmit={onSubmit} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="rollNumber"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Username
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    id="rollNumber"
-                    value={rollNumber}
-                    onChange={(e) => onRollNumberChange(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Enter your username"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Password
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => onPasswordChange(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    placeholder="Enter password"
-                    required
-                  />
-                </div>
-              </div>
+            <form onSubmit={onSubmit} className="mt-8 space-y-5">
+              <Field
+                id="rollNumber"
+                label="Username"
+                type="text"
+                value={rollNumber}
+                placeholder="Roll number"
+                autoComplete="username"
+                onChange={onRollNumberChange}
+              />
+              <Field
+                id="password"
+                label="Password"
+                type="password"
+                value={password}
+                placeholder="Password"
+                autoComplete="current-password"
+                onChange={onPasswordChange}
+              />
 
               {notice && (
-                <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm">
+                <p className="rounded-md border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
                   {notice}
-                </div>
+                </p>
               )}
-
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
                   {error}
-                </div>
+                </p>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all disabled:opacity-50 shadow-lg shadow-blue-500/30"
+                className="w-full rounded-md bg-blue-600 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-60"
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? "Signing in..." : "Login"}
               </button>
             </form>
 
             {hint && (
-              <div className="mt-6 text-center text-sm text-gray-600">{hint}</div>
+              <div className="mt-5 text-center text-sm text-neutral-600">{hint}</div>
             )}
           </div>
         </div>
-      </div>
-
+      </section>
       <Footer />
+    </div>
+  );
+}
+
+function Field({
+  id,
+  label,
+  type,
+  value,
+  placeholder,
+  autoComplete,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  type: string;
+  value: string;
+  placeholder: string;
+  autoComplete: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-neutral-800">
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        autoComplete={autoComplete}
+        placeholder={placeholder}
+        required
+        onChange={(e) => onChange(e.target.value)}
+        className={fieldClass}
+      />
+    </div>
+  );
+}
+
+const SLIDE_MS = 4000;
+const SLIDE_MOVE_MS = 700;
+
+function LoginSlides() {
+  const [index, setIndex] = useState(0);
+  const [animate, setAnimate] = useState(true);
+  const settled = useRef(false);
+  const active = index % SLIDES.length;
+  // First slide is repeated at the end so the wrap moves forward, then snaps back.
+  const track = [...SLIDES, SLIDES[0]];
+
+  const finishLoop = () => {
+    if (settled.current) return;
+    settled.current = true;
+    setAnimate(false);
+    setIndex(0);
+  };
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setIndex((current) => (current >= SLIDES.length ? current : current + 1));
+    }, SLIDE_MS);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    if (index !== SLIDES.length) {
+      settled.current = false;
+      return;
+    }
+    const id = window.setTimeout(finishLoop, SLIDE_MOVE_MS);
+    return () => window.clearTimeout(id);
+  }, [index]);
+
+  useLayoutEffect(() => {
+    if (animate) return;
+    let inner = 0;
+    const outer = window.requestAnimationFrame(() => {
+      inner = window.requestAnimationFrame(() => setAnimate(true));
+    });
+    return () => {
+      window.cancelAnimationFrame(outer);
+      window.cancelAnimationFrame(inner);
+    };
+  }, [animate]);
+
+  const onTrackTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget || event.propertyName !== "transform") return;
+    if (index === SLIDES.length) finishLoop();
+  };
+
+  return (
+    <div className="flex h-[42vh] shrink-0 flex-col bg-blue-600 text-white lg:h-auto lg:w-1/2">
+      <div className="flex-1 overflow-hidden">
+        <div
+          onTransitionEnd={onTrackTransitionEnd}
+          className={`flex h-full will-change-transform ${
+            animate ? "transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" : ""
+          }`}
+          style={{ transform: `translateX(-${index * 100}%)` }}
+        >
+          {track.map((slide, i) => (
+            <SlidePanel key={`${slide.title}-${i}`} slide={slide} />
+          ))}
+        </div>
+      </div>
+      <div className="flex justify-center gap-2 pb-8" role="tablist" aria-label="Highlights">
+        {SLIDES.map((item, i) => (
+          <button
+            key={item.title}
+            type="button"
+            role="tab"
+            aria-selected={i === active}
+            aria-label={item.title}
+            onClick={() => setIndex(i)}
+            className={`h-2 rounded-full ${i === active ? "w-6 bg-white" : "w-2 bg-white/50"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SlidePanel({ slide }: { slide: (typeof SLIDES)[number] }) {
+  const Art = slide.Art;
+  return (
+    <div className="flex w-full shrink-0 flex-col items-center justify-center px-8 text-center">
+      <div className="mb-8 h-52 w-52 rounded-[2rem] bg-white p-3 sm:h-60 sm:w-60">
+        <Art />
+      </div>
+      <h2 className="max-w-md text-2xl font-semibold sm:text-3xl">{slide.title}</h2>
+      <p className="mt-3 max-w-sm text-sm leading-6 text-blue-50">{slide.text}</p>
     </div>
   );
 }
