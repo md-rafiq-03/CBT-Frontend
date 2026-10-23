@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import {
+  PALETTE_STATUS_LEGEND,
+  paletteCellClass,
+} from "@/constants/questionPalette";
 
 interface TestInstructionsProps {
   testName: string;
@@ -10,30 +14,6 @@ interface TestInstructionsProps {
   onProceed: () => void;
   onBack: () => void;
 }
-
-const PALETTE_STATUSES = [
-  {
-    label: "You have not visited the question yet.",
-    swatch: "bg-gray-200 text-gray-500",
-  },
-  {
-    label: "You have visited the question, but have not answered it.",
-    swatch: "bg-red-100 text-red-700",
-  },
-  {
-    label: "You have answered the question.",
-    swatch: "bg-green-100 text-green-700",
-  },
-  {
-    label: "You have not answered the question, but have marked it for review.",
-    swatch: "bg-orange-100 text-orange-800",
-  },
-  {
-    label:
-      "You have answered the question and marked it for review. These answers are still submitted.",
-    swatch: "bg-purple-100 text-purple-800",
-  },
-] as const;
 
 export default function TestInstructions({
   testName,
@@ -94,10 +74,13 @@ export default function TestInstructions({
                   The question palette on the right shows the status of each
                   question:
                   <ul className="mt-3 space-y-2">
-                    {PALETTE_STATUSES.map((status, index) => (
-                      <li key={status.label} className="flex items-start gap-3">
+                    {PALETTE_STATUS_LEGEND.map((status, index) => (
+                      <li key={status.key} className="flex items-start gap-3">
                         <span
-                          className={`mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-bold ${status.swatch}`}
+                          className={`mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-xs font-bold ${paletteCellClass(
+                            status.key,
+                            false
+                          )}`}
                         >
                           {index + 1}
                         </span>
@@ -155,9 +138,25 @@ export default function TestInstructions({
                   remove it.
                 </li>
                 <li>
-                  When you are finished, click <Action>Submit</Action> in the
-                  header. You can still change answers until you confirm
-                  submission, or until time runs out.
+                  Submit stays locked for the first 30 minutes. After that,
+                  click <Action>Submit</Action> in the header. You can still
+                  change answers until you confirm submission, or until time
+                  runs out.
+                </li>
+              </ol>
+            </InstructionSection>
+
+            <InstructionSection title="During the test">
+              <ol className="list-decimal pl-5 space-y-2">
+                <li>Copy, cut, paste, and right-click are disabled.</li>
+                <li>
+                  Screenshots and switching away from this screen are not
+                  allowed. Doing so flags the attempt.
+                </li>
+                <li>
+                  You cannot leave this page without submitting. The browser
+                  back button opens the submit confirmation after the 30-minute
+                  lock-in. Before that, you must stay on the test.
                 </li>
               </ol>
             </InstructionSection>
@@ -170,9 +169,11 @@ export default function TestInstructions({
                   <strong>{sectionLabel}</strong>.
                 </li>
                 <li>
-                  Each section is grouped in the question palette. Click any
-                  question number to open it. You can move between sections
-                  until the timer ends.
+                  The question palette shows questions for the{" "}
+                  <strong>current section only</strong>. Use the section
+                  dropdown next to the timer to switch sections. You can still
+                  jump to any question in the current section until the timer
+                  ends.
                 </li>
               </ol>
             </InstructionSection>

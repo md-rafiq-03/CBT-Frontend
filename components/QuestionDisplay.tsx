@@ -7,6 +7,7 @@ import {
   QuestionAttachment,
   StudentAnswer,
 } from "../lib/Interface";
+import { paletteCellClass } from "@/constants/questionPalette";
 
 interface QuestionDisplayProps {
   question: Question;
@@ -84,32 +85,36 @@ export default function QuestionDisplay({
   };
 
   const btn =
-    "px-3 py-2.5 rounded-lg text-xs sm:text-sm font-semibold border shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed";
+    "px-1.5 py-1.5 sm:px-2.5 rounded text-[10px] sm:text-xs font-semibold border leading-none whitespace-nowrap transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation";
+  const btnCompact =
+    "px-2 py-1.5 rounded text-[11px] font-semibold border leading-none whitespace-nowrap transition-colors disabled:cursor-not-allowed touch-manipulation";
 
   return (
     <div className="h-full min-h-0 flex flex-col">
-      <div className="shrink-0 bg-white border-b border-gray-200 p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm text-gray-600 mb-1">
-              {question.section} • Question {questionPosition}
-              {isMarkedForReview && (
-                <span className="ml-2 text-orange-700 bg-orange-100 px-2 py-0.5 rounded text-xs font-semibold">
-                  Marked for review
-                </span>
-              )}
+      <div className="shrink-0 bg-white border-b border-gray-200 px-2.5 py-2 sm:px-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="min-w-0 flex items-center gap-1.5 flex-wrap">
+            <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">
+              <span className="uppercase">{question.section}</span>
+              <span className="text-gray-400 font-normal"> • </span>
+              Q {questionPosition}
             </p>
-            <h2 className="text-xl font-bold text-gray-900">Question</h2>
+            {isMarkedForReview && (
+              <span className="text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded text-[10px] font-semibold shrink-0">
+                Marked
+              </span>
+            )}
           </div>
-          <div className="text-right shrink-0">
-            <p className="text-xs text-gray-500">Marks</p>
-            <p className="text-xl font-bold text-blue-600">{question.marks}</p>
+          <div className="text-right shrink-0 leading-tight">
+            <p className="text-[10px] uppercase tracking-wide text-gray-500">
+              Marks
+            </p>
+            <p className="text-sm font-bold text-blue-600">{question.marks}</p>
           </div>
         </div>
 
-        {/* Review: Show Answer always visible under question header */}
         {isReviewMode && (
-          <div className="mt-3">
+          <div className="mt-2">
             <button
               type="button"
               onClick={onToggleShowAnswer}
@@ -125,26 +130,26 @@ export default function QuestionDisplay({
         )}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6">
-        <div className="space-y-6">
-          <p className="text-lg font-semibold text-gray-900 leading-relaxed">
+      <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2.5 py-2.5 sm:px-4 sm:py-3">
+        <div className="space-y-2.5 sm:space-y-3">
+          <p className="text-sm font-medium text-gray-900 leading-snug break-words">
             {question.stem}
           </p>
 
           {attachments.length > 0 && (
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {attachments.map((attachment) => (
                 <button
                   key={attachment.url}
                   type="button"
                   onClick={() => setZoomedSrc(attachment.url)}
-                  className="bg-gray-50 rounded-lg overflow-hidden w-[min(100%,18rem)] sm:w-72 cursor-zoom-in text-left"
+                  className="bg-gray-50 rounded overflow-hidden w-[min(100%,14rem)] sm:w-56 cursor-zoom-in text-left"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={attachment.url}
                     alt="Question attachment"
-                    className="w-full h-auto max-h-44 object-contain"
+                    className="w-full h-auto max-h-36 object-contain"
                   />
                 </button>
               ))}
@@ -152,18 +157,18 @@ export default function QuestionDisplay({
           )}
 
           {question.type === "MCQ" ? (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-gray-700">
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-gray-600">
                 {readOnly ? "Your selection:" : "Select the correct option:"}
               </p>
               {options.map((option) => (
                 <label
                   key={option.optionId}
-                  className={`block p-4 rounded-lg border-2 transition-all ${
+                  className={`block px-3 py-2 rounded border transition-all ${
                     readOnly ? "cursor-default" : "cursor-pointer"
                   } ${optionClass(option.optionId)}`}
                 >
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start gap-2.5">
                     <input
                       type="radio"
                       name={`question-${question.id || question.questionId}`}
@@ -173,15 +178,15 @@ export default function QuestionDisplay({
                         !readOnly && onAnswerChange(e.target.value)
                       }
                       disabled={readOnly}
-                      className="mt-1 w-5 h-5 text-blue-600"
+                      className="mt-0.5 w-4 h-4 text-blue-600"
                     />
-                    <div className="flex-1 space-y-2">
+                    <div className="flex-1 space-y-1.5 min-w-0">
                       {option.text && (
-                        <p className="text-gray-900 font-medium">
+                        <p className="text-sm text-gray-900">
                           {option.text}
                           {showCorrectAnswer &&
                             option.optionId === correctKey && (
-                              <span className="ml-2 text-xs font-semibold text-green-700">
+                              <span className="ml-2 text-[11px] font-semibold text-green-700">
                                 Correct
                               </span>
                             )}
@@ -195,13 +200,13 @@ export default function QuestionDisplay({
                             e.stopPropagation();
                             setZoomedSrc(option.image!);
                           }}
-                          className="bg-gray-50 rounded-lg overflow-hidden w-[min(100%,10rem)] sm:w-40 cursor-zoom-in text-left"
+                          className="bg-gray-50 rounded overflow-hidden w-[min(100%,8rem)] sm:w-32 cursor-zoom-in text-left"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={option.image}
                             alt={`Option ${option.optionId}`}
-                            className="w-full h-auto max-h-28 object-contain"
+                            className="w-full h-auto max-h-24 object-contain"
                           />
                         </button>
                       )}
@@ -212,7 +217,7 @@ export default function QuestionDisplay({
             </div>
           ) : (
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-4">
+              <p className="text-xs font-semibold text-gray-600 mb-2">
                 {readOnly ? "Your answer:" : "Enter your answer:"}
               </p>
               <input
@@ -221,7 +226,7 @@ export default function QuestionDisplay({
                 onChange={(e) => handleIntegerChange(e.target.value)}
                 placeholder="Enter your answer"
                 disabled={readOnly}
-                className={`w-full px-4 py-3 border-2 rounded-lg outline-none text-lg font-semibold ${
+                className={`w-full max-w-xs px-3 py-2 border rounded outline-none text-sm font-semibold ${
                   showCorrectAnswer && correctKey
                     ? getSelectedAnswer() === correctKey
                       ? "border-green-600 bg-green-50"
@@ -230,7 +235,7 @@ export default function QuestionDisplay({
                 }`}
               />
               {showCorrectAnswer && correctKey && (
-                <p className="mt-2 text-sm text-green-700 font-medium">
+                <p className="mt-1.5 text-xs text-green-700 font-medium">
                   Correct answer: {correctKey}
                 </p>
               )}
@@ -238,7 +243,7 @@ export default function QuestionDisplay({
           )}
 
           {showCorrectAnswer && question.correctAnswer?.explanation && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-900">
+            <div className="bg-blue-50 border border-blue-200 rounded px-3 py-2 text-xs text-blue-900">
               <span className="font-semibold">Explanation: </span>
               {question.correctAnswer.explanation}
             </div>
@@ -246,51 +251,60 @@ export default function QuestionDisplay({
         </div>
       </div>
 
-      {/* Always-visible action bar pinned under the question */}
-      <div className="shrink-0 bg-slate-50 border-t-2 border-slate-200 p-3 sm:p-4">
+      <div className="shrink-0 bg-slate-50 border-t border-slate-200 px-1.5 py-1.5 sm:px-3 sm:py-2">
         {!isReviewMode ? (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-center gap-1 sm:flex-nowrap">
             <button
               type="button"
               onClick={onPrevious}
               disabled={!hasPrevious}
-              className={`${btn} bg-white text-gray-800 border-gray-300 hover:bg-gray-100`}
+              className={`${btnCompact} order-1 border-slate-700 bg-slate-700 text-white hover:bg-slate-800 disabled:bg-slate-500 disabled:text-white disabled:opacity-100`}
             >
-              Previous
+              Prev
             </button>
             <button
               type="button"
               onClick={onClear}
-              className={`${btn} bg-white text-gray-800 border-gray-300 hover:bg-gray-100`}
+              className={`${btnCompact} order-2 border-transparent ${paletteCellClass("visitedUnanswered")}`}
             >
-              Clear selection
+              Clear
             </button>
             <button
               type="button"
               onClick={onMarkForReview}
-              className={`${btn} bg-orange-100 text-orange-900 border-orange-300 hover:bg-orange-200`}
+              className={`${btn} order-4 basis-[calc(50%-0.125rem)] border-transparent sm:order-3 sm:basis-auto sm:flex-none ${paletteCellClass("marked")}`}
             >
-              Mark for review
+              <span className="sm:hidden">Mark</span>
+              <span className="hidden sm:inline">Mark for review</span>
             </button>
             <button
               type="button"
               onClick={onMarkForReviewAndNext}
               disabled={!hasNext}
-              className={`${btn} bg-purple-100 text-purple-900 border-purple-300 hover:bg-purple-200`}
+              className={`${btn} order-5 basis-[calc(50%-0.125rem)] border-transparent sm:order-4 sm:basis-auto sm:flex-none ${paletteCellClass("answeredMarked")}`}
             >
-              Mark for review & Next
+              <span className="sm:hidden">Mark & Next</span>
+              <span className="hidden sm:inline">Mark for review & Next</span>
             </button>
             <button
               type="button"
               onClick={onSaveAndNext}
               disabled={!hasNext}
-              className={`${btn} bg-blue-600 text-white border-blue-600 hover:bg-blue-700`}
+              className={`${btn} order-3 ml-auto border-transparent sm:order-5 ${paletteCellClass("answered")}`}
             >
               Save & Next
             </button>
           </div>
         ) : (
-          <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={onPrevious}
+              disabled={!hasPrevious}
+              className={`${btnCompact} border-slate-700 bg-slate-700 text-white hover:bg-slate-800 disabled:bg-slate-500 disabled:text-white disabled:opacity-100`}
+            >
+              Prev
+            </button>
             <button
               type="button"
               onClick={onToggleShowAnswer}
@@ -300,21 +314,13 @@ export default function QuestionDisplay({
                   : "bg-green-600 text-white border-green-600"
               }`}
             >
-              {showCorrectAnswer ? "Hide Answer" : "Show Answer"}
-            </button>
-            <button
-              type="button"
-              onClick={onPrevious}
-              disabled={!hasPrevious}
-              className={`${btn} bg-white text-gray-800 border-gray-300`}
-            >
-              Previous
+              {showCorrectAnswer ? "Hide" : "Show"} Answer
             </button>
             <button
               type="button"
               onClick={onSaveAndNext}
               disabled={!hasNext}
-              className={`${btn} bg-blue-600 text-white border-blue-600`}
+              className={`${btn} ml-auto bg-blue-600 text-white border-blue-600`}
             >
               Next
             </button>

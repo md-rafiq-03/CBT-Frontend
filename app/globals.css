@@ -41,3 +41,22 @@ html::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.25);
   border-radius: 999px;
 }
+
+html.attempt-lock,
+html.attempt-lock body {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+html.attempt-lock input,
+html.attempt-lock textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+@media print {
+  html.attempt-lock body {
+    visibility: hidden;
+  }
+}

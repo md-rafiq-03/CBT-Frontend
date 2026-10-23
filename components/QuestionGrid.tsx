@@ -1,4 +1,8 @@
-import { CheckCircle2, Circle, Flag } from "lucide-react";
+import {
+  PALETTE_STATUS_LEGEND,
+  paletteCellClass,
+  type PaletteStatusKey,
+} from "@/constants/questionPalette";
 
 interface QuestionGridProps {
   sections: string[];
@@ -8,6 +12,23 @@ interface QuestionGridProps {
   currentQuestionId: string;
   onQuestionSelect: (questionId: string) => void;
   questionIds: { [key: string]: string[] };
+  /** When set, only this section's questions are shown in the palette. */
+  activeSection?: string;
+}
+
+function statusForQuestion(
+  qId: string,
+  answeredQuestions: Set<string>,
+  markedForReview: Set<string>,
+  visitedQuestions?: Set<string>
+): PaletteStatusKey {
+  const answered = answeredQuestions.has(qId);
+  const marked = markedForReview.has(qId);
+  if (answered && marked) return "answeredMarked";
+  if (marked) return "marked";
+  if (answered) return "answered";
+  if (visitedQuestions?.has(qId)) return "visitedUnanswered";
+  return "notVisited";
 }
 
 export default function QuestionGrid({
@@ -18,62 +39,70 @@ export default function QuestionGrid({
   currentQuestionId,
   onQuestionSelect,
   questionIds,
+  activeSection,
 }: QuestionGridProps) {
-  const totalQuestions = sections.reduce(
+  const visibleSections = activeSection
+    ? sections.filter((s) => s === activeSection)
+    : sections;
+
+  const totalInView = visibleSections.reduce(
     (sum, section) => sum + (questionIds[section]?.length || 0),
     0
   );
 
+  const answeredInView = visibleSections.reduce((sum, section) => {
+    const ids = questionIds[section] || [];
+    return sum + ids.filter((id) => answeredQuestions.has(id)).length;
+  }, 0);
+
   const cellClass = (qId: string, isCurrent: boolean) => {
-    const answered = answeredQuestions.has(qId);
-    const marked = markedForReview.has(qId);
     if (isCurrent) {
-      return "ring-2 ring-offset-2 ring-blue-600 bg-blue-600 text-white shadow-lg";
+      return "ring-2 ring-offset-1 ring-blue-600 bg-blue-600 text-white";
     }
-    if (answered && marked) {
-      return "bg-purple-100 text-purple-800 hover:bg-purple-200";
-    }
-    if (marked) {
-      return "bg-orange-100 text-orange-800 hover:bg-orange-200";
-    }
-    if (answered) {
-      return "bg-green-100 text-green-700 hover:bg-green-200";
-    }
-    if (visitedQuestions?.has(qId)) {
-      return "bg-red-50 text-red-700 hover:bg-red-100";
-    }
-    return "bg-gray-100 text-gray-600 hover:bg-gray-200";
+    return paletteCellClass(
+      statusForQuestion(qId, answeredQuestions, markedForReview, visitedQuestions)
+    );
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md h-full flex flex-col overflow-hidden">
-      <div className="bg-linear-to-r from-blue-600 to-blue-500 text-white p-4">
-        <h3 className="font-bold text-lg">Questions Overview</h3>
-      </div>
+    <div className="bg-white border border-gray-200 flex flex-col overflow-hidden h-full lg:rounded">
+      {activeSection && (
+        <div className="bg-blue-600 text-white px-3 py-1.5 flex items-center justify-between gap-2">
+          <h3 className="font-semibold text-xs sm:text-sm truncate">
+            {activeSection}
+          </h3>
+          <p className="text-[10px] sm:text-[11px] text-blue-100 shrink-0">
+            {answeredInView}/{totalInView} answered
+          </p>
+        </div>
+      )}
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {sections.map((section) => {
+      <div className="flex-1 overflow-y-auto p-2 sm:p-2.5">
+        {visibleSections.map((section) => {
           const sectionQuestionIds = questionIds[section] || [];
           return (
             <div key={section}>
-              <h4 className="font-semibold text-gray-900 mb-2 text-sm uppercase tracking-wide">
-                {section}
-              </h4>
-              <div className="grid grid-cols-5 gap-2">
+              {!activeSection && (
+                <h4 className="font-semibold text-gray-800 mb-1.5 text-xs uppercase tracking-wide">
+                  {section}
+                </h4>
+              )}
+              <div className="grid grid-cols-6 sm:grid-cols-6 lg:grid-cols-5 gap-1 sm:gap-1.5">
                 {sectionQuestionIds.map((qId, index) => {
                   const qNum = index + 1;
                   const isCurrent = currentQuestionId === qId;
                   return (
                     <button
                       key={`${section}-${qId || qNum}`}
+                      type="button"
                       onClick={() => onQuestionSelect(qId)}
-                      className={`aspect-square rounded-lg font-semibold text-sm transition-all transform hover:scale-105 flex items-center justify-center relative ${cellClass(
+                      className={`aspect-square min-h-[2rem] rounded font-semibold text-[11px] sm:text-xs flex items-center justify-center touch-manipulation ${cellClass(
                         qId,
                         isCurrent
                       )}`}
                       title={`Q${qNum}`}
                     >
-                      <span className="z-10">{qNum}</span>
+                      {qNum}
                     </button>
                   );
                 })}
@@ -83,27 +112,21 @@ export default function QuestionGrid({
         })}
       </div>
 
-      <div className="border-t border-gray-200 p-4 space-y-2 text-xs">
-        <div className="flex items-center gap-2">
-          <Circle className="w-3.5 h-3.5 fill-gray-300 text-gray-300" />
-          <span>Not visited</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-          <span>Answered</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Flag className="w-3.5 h-3.5 text-orange-600" />
-          <span>Marked for review</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Flag className="w-3.5 h-3.5 text-purple-600" />
-          <span>Answered + marked</span>
-        </div>
-        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mt-2">
-          <p className="text-xs font-semibold text-blue-900">
-            Answered: {answeredQuestions.size} / {totalQuestions}
-          </p>
+      <div className="border-t border-gray-200 px-2 py-1.5 sm:px-2.5 sm:py-2">
+        <div className="grid grid-cols-2 sm:grid-cols-1 gap-x-2 gap-y-1 text-[10px] sm:text-[11px]">
+          {PALETTE_STATUS_LEGEND.map((status) => (
+            <div key={status.key} className="flex items-center gap-1.5 min-w-0">
+              <span
+                className={`inline-block h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-sm shrink-0 ${paletteCellClass(
+                  status.key,
+                  false
+                )}`}
+              />
+              <span className="text-gray-600 leading-tight truncate">
+                {status.shortLabel}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

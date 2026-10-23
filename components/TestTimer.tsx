@@ -44,11 +44,11 @@ export default function TestTimer({
 
   return (
     <div
-      className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-mono font-bold text-lg transition-all ${
+      className={`flex items-center gap-1 px-2 py-1.5 rounded font-mono font-semibold text-xs sm:text-sm transition-all whitespace-nowrap ${
         isWarning ? "bg-red-100 text-red-700" : "bg-blue-100 text-blue-700"
       }`}
     >
-      <Clock className="w-5 h-5" />
+      <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
       <span>
         {formatTime(hours)}:{formatTime(minutes)}:{formatTime(seconds)}
       </span>
