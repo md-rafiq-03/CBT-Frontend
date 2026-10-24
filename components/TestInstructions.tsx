@@ -150,13 +150,20 @@ export default function TestInstructions({
               <ol className="list-decimal pl-5 space-y-2">
                 <li>Copy, cut, paste, and right-click are disabled.</li>
                 <li>
-                  Screenshots and switching away from this screen are not
-                  allowed. Doing so flags the attempt.
+                  Screenshots are not allowed. Switching to another tab is
+                  counted. When you come back, a message shows how many
+                  switches you have used. On the third switch the test is
+                  submitted automatically and the attempt is flagged.
                 </li>
                 <li>
                   You cannot leave this page without submitting. The browser
                   back button opens the submit confirmation after the 30-minute
                   lock-in. Before that, you must stay on the test.
+                </li>
+                <li>
+                  Do not reload this page. A reload does not start the test
+                  again. Your answers and remaining time stay as they were, and
+                  the attempt is flagged.
                 </li>
               </ol>
             </InstructionSection>
@@ -171,9 +178,9 @@ export default function TestInstructions({
                 <li>
                   The question palette shows questions for the{" "}
                   <strong>current section only</strong>. Use the section
-                  dropdown next to the timer to switch sections. You can still
-                  jump to any question in the current section until the timer
-                  ends.
+                  dropdown above the question list to switch sections. You can
+                  still jump to any question in the current section until the
+                  timer ends.
                 </li>
               </ol>
             </InstructionSection>

@@ -1,40 +1,67 @@
 import { Clock } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface TestTimerProps {
   durationMinutes: number;
   onTimeUp: () => void;
   isActive: boolean;
+  /** Wall-clock start. When set, a reload keeps the remaining time. */
+  startedAt?: number;
+}
+
+function remainingSeconds(durationMinutes: number, startedAt?: number) {
+  const total = Math.max(0, Math.floor(durationMinutes * 60));
+  if (!startedAt) return total;
+  const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+  return Math.max(0, total - elapsed);
 }
 
 export default function TestTimer({
   durationMinutes,
   onTimeUp,
   isActive,
+  startedAt,
 }: TestTimerProps) {
-  const [timeRemaining, setTimeRemaining] = useState(durationMinutes * 60);
-  const [isWarning, setIsWarning] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(() =>
+    remainingSeconds(durationMinutes, startedAt)
+  );
+  const [isWarning, setIsWarning] = useState(
+    () => remainingSeconds(durationMinutes, startedAt) <= 300
+  );
+  const firedRef = useRef(false);
+  const remainingRef = useRef(timeRemaining);
+  const startedAtRef = useRef(startedAt);
+  if (startedAtRef.current !== startedAt) {
+    startedAtRef.current = startedAt;
+    firedRef.current = false;
+    remainingRef.current = remainingSeconds(durationMinutes, startedAt);
+  }
 
   useEffect(() => {
     if (!isActive) return;
 
-    const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
-        const newTime = prev - 1;
-        if (newTime <= 0) {
-          clearInterval(timer);
-          onTimeUp();
-          return 0;
-        }
-        if (newTime <= 300) {
-          setIsWarning(true);
-        }
-        return newTime;
-      });
+    const apply = (next: number) => {
+      const value = Math.max(0, next);
+      remainingRef.current = value;
+      setTimeRemaining(value);
+      if (value <= 300) setIsWarning(true);
+      if (value <= 0 && !firedRef.current) {
+        firedRef.current = true;
+        onTimeUp();
+      }
+    };
+
+    if (startedAt) apply(remainingSeconds(durationMinutes, startedAt));
+
+    const timer = window.setInterval(() => {
+      const next = startedAt
+        ? remainingSeconds(durationMinutes, startedAt)
+        : remainingRef.current - 1;
+      apply(next);
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [isActive, onTimeUp]);
+    return () => window.clearInterval(timer);
+  }, [isActive, onTimeUp, startedAt, durationMinutes]);
 
   const hours = Math.floor(timeRemaining / 3600);
   const minutes = Math.floor((timeRemaining % 3600) / 60);
