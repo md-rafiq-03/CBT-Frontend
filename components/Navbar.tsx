@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { BookOpen, User, LogOut, Menu, X, KeyRound } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { User, LogOut, Menu, X, KeyRound, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 
+export type TestListTab = "all" | "active" | "attempted" | "unattempted";
+
 interface NavbarProps {
-  activeTab: "all" | "active" | "attempted" | "previous";
-  onTabChange: (tab: "all" | "active" | "attempted" | "previous") => void;
+  activeTab?: TestListTab | null;
+  onTabChange: (tab: TestListTab) => void;
 }
 
 export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
@@ -15,12 +17,31 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!showProfileMenu) return;
+    const onPointer = (event: MouseEvent) => {
+      if (!profileRef.current?.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setShowProfileMenu(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [showProfileMenu]);
 
   const tabs = [
     { id: "all" as const, label: "All Tests" },
     { id: "active" as const, label: "Active Tests" },
     { id: "attempted" as const, label: "Attempted" },
-    { id: "previous" as const, label: "Previous" },
+    { id: "unattempted" as const, label: "Unattempted" },
   ];
 
   const handleLogout = async () => {
@@ -33,9 +54,11 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-3">
-            <div className="bg-linear-to-br from-blue-600 to-blue-500 p-2 rounded-lg">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="Kinematics Classes"
+              className="h-10 w-10 rounded-full object-cover"
+            />
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-gray-900">
                 Kinematics Classes
@@ -61,7 +84,16 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            <a
+              href="https://kinematicsclasses.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+            >
+              Coaching site
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+            <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
                 className="flex items-center space-x-2 hover:bg-gray-100 rounded-lg px-3 py-2 transition-all"
@@ -78,13 +110,23 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
               </button>
 
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white py-2 shadow-lg">
                   <div className="px-4 py-3 border-b border-gray-100">
                     <p className="text-sm font-semibold text-gray-900">
                       {user?.fullName}
                     </p>
                     <p className="text-xs text-gray-500">{user?.rollNumber}</p>
                   </div>
+                  <button
+                    onClick={() => {
+                      setShowProfileMenu(false);
+                      router.push("/profile");
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Profile</span>
+                  </button>
                   <button
                     onClick={() => {
                       setShowProfileMenu(false);
@@ -122,6 +164,14 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-2">
+              <a
+                href="https://kinematicsclasses.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 rounded-lg font-medium text-sm text-blue-600 hover:bg-gray-100"
+              >
+                Coaching site
+              </a>
               {tabs.map((tab) => (
                 <button
                   key={tab.id}

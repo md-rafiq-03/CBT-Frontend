@@ -1,15 +1,119 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search, Filter } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, Search } from "lucide-react";
 import { Test, TestAttempt } from "../lib/Interface";
 import { useAuth } from "../contexts/AuthContext";
-import Navbar from "../components/Navbar";
+import Navbar, { type TestListTab } from "../components/Navbar";
 import Footer from "../components/Footer";
 import TestCard from "../components/TestCard";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { getTests } from "../lib/testApi";
 import { getSubmissionsByUserId } from "../lib/submissionApi";
+
+const POSTED_SORTS = [
+  {
+    id: "newest" as const,
+    title: "Newest first",
+    hint: "Latest posted date on top",
+  },
+  {
+    id: "oldest" as const,
+    title: "Oldest first",
+    hint: "Earliest posted date on top",
+  },
+];
+
+function PostedSortMenu({
+  value,
+  onChange,
+}: {
+  value: "newest" | "oldest";
+  onChange: (value: "newest" | "oldest") => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const current = POSTED_SORTS.find((option) => option.id === value) ?? POSTED_SORTS[0];
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (event: MouseEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative sm:w-60">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-label="Sort by posted date"
+        onClick={() => setOpen((isOpen) => !isOpen)}
+        className="flex w-full items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-left shadow-sm transition hover:border-blue-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+      >
+        <span className="min-w-0">
+          <span className="block text-xs font-medium text-gray-500">Posted</span>
+          <span className="block truncate text-sm font-semibold text-gray-900">
+            {current.title}
+          </span>
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-gray-500 transition ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          aria-label="Sort by posted date"
+          className="absolute right-0 z-30 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-1.5 shadow-lg"
+        >
+          {POSTED_SORTS.map((option) => {
+            const selected = option.id === value;
+            return (
+              <li key={option.id}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={selected}
+                  onClick={() => {
+                    onChange(option.id);
+                    setOpen(false);
+                  }}
+                  className={`flex w-full flex-col rounded-lg px-3 py-2.5 text-left transition ${
+                    selected
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  <span className="text-sm font-semibold">{option.title}</span>
+                  <span
+                    className={`text-xs ${
+                      selected ? "text-blue-600" : "text-gray-500"
+                    }`}
+                  >
+                    {option.hint}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export default function Home() {
   return (
@@ -21,13 +125,24 @@ export default function Home() {
 
 function HomeContent() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<
-    "all" | "active" | "attempted" | "previous"
-  >("all");
+  const [activeTab, setActiveTab] = useState<TestListTab>("all");
   const [tests, setTests] = useState<Test[]>([]);
   const [attempts, setAttempts] = useState<TestAttempt[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [postedSort, setPostedSort] = useState<"newest" | "oldest">("newest");
+
+  useEffect(() => {
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    if (
+      tab === "all" ||
+      tab === "active" ||
+      tab === "attempted" ||
+      tab === "unattempted"
+    ) {
+      setActiveTab(tab);
+    }
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -62,6 +177,13 @@ function HomeContent() {
     load();
   }, [user]);
 
+  const attemptedIds = new Set(attempts.map((attempt) => attempt.test_id));
+
+  const hasAttempt = (test: Test) => {
+    const keys = [test.testId, test.id].filter(Boolean) as string[];
+    return keys.some((key) => attemptedIds.has(key));
+  };
+
   const getFilteredTests = () => {
     const now = new Date();
     let filtered = tests;
@@ -74,18 +196,11 @@ function HomeContent() {
           return now >= start && now <= end && test.active;
         });
         break;
-      case "attempted": {
-        const attemptedTestIds = attempts.map((a) => a.test_id);
-        filtered = tests.filter((test) =>
-          attemptedTestIds.includes(test.testId || test.id)
-        );
+      case "attempted":
+        filtered = tests.filter(hasAttempt);
         break;
-      }
-      case "previous":
-        filtered = tests.filter((test) => {
-          const end = new Date(Number(test.expireAt));
-          return now > end;
-        });
+      case "unattempted":
+        filtered = tests.filter((test) => !hasAttempt(test));
         break;
       default:
         filtered = tests;
@@ -97,7 +212,10 @@ function HomeContent() {
       );
     }
 
-    return filtered;
+    return [...filtered].sort((a, b) => {
+      const diff = Number(a.startAt || 0) - Number(b.startAt || 0);
+      return postedSort === "oldest" ? diff : -diff;
+    });
   };
 
   const getAttemptForTest = (test: Test) => {
@@ -117,13 +235,13 @@ function HomeContent() {
             {activeTab === "all" && "All Tests"}
             {activeTab === "active" && "Active Tests"}
             {activeTab === "attempted" && "Attempted Tests"}
-            {activeTab === "previous" && "Previous Tests"}
+            {activeTab === "unattempted" && "Unattempted Tests"}
           </h2>
           <p className="text-gray-600">
             {activeTab === "all" && "Browse all available tests"}
             {activeTab === "active" && "Tests currently available for attempt"}
             {activeTab === "attempted" && "Tests you have already attempted"}
-            {activeTab === "previous" && "Expired tests"}
+            {activeTab === "unattempted" && "Tests you have not attempted yet"}
           </p>
         </div>
 
@@ -135,13 +253,10 @@ function HomeContent() {
               placeholder="Search tests..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-4 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             />
           </div>
-          <button className="bg-white border border-gray-300 hover:bg-gray-50 px-6 py-3 rounded-lg font-medium text-gray-700 flex items-center justify-center space-x-2 transition-all">
-            <Filter className="w-5 h-5" />
-            <span>Filter</span>
-          </button>
+          <PostedSortMenu value={postedSort} onChange={setPostedSort} />
         </div>
 
         {loading ? (
@@ -160,7 +275,7 @@ function HomeContent() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-col gap-3">
             {filteredTests.map((test) => (
               <TestCard
                 key={test.testId || test.id}

@@ -74,9 +74,9 @@ export default function LoginShell({
         <LoginSlides />
         <div className="relative flex min-h-[58vh] flex-1 items-center justify-center px-6 py-16 lg:min-h-0 lg:px-12">
           <img
-            src="/dsss-logo.jpg"
+            src="/logo.png"
             alt="Kinematics Classes"
-            className="absolute top-6 right-6 h-16 w-16 object-contain sm:h-20 sm:w-20"
+            className="absolute top-6 right-6 h-16 w-16 rounded-full object-cover sm:h-20 sm:w-20"
           />
           <div className="w-full max-w-sm">
             <h1 className="text-2xl font-semibold text-neutral-900">{title}</h1>

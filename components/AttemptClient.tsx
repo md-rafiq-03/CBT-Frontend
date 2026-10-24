@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import { useEffect, useMemo, useState } from "react";
-import { LogOut, BookOpen } from "lucide-react";
+import { LogOut } from "lucide-react";
 import TestConfirmDialog from "./TestConfirmDialog";
 import TestTimer from "./TestTimer";
 import QuestionDisplay from "./QuestionDisplay";
@@ -221,9 +221,11 @@ export default function AttemptClient() {
       <header className="bg-white shadow-md sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
+            <img
+              src="/logo.png"
+              alt="Kinematics Classes"
+              className="h-10 w-10 rounded-full object-cover"
+            />
             <div>
               <h1 className="text-lg font-bold text-gray-900">{test.description}</h1>
               {/* <p className="text-sm text-gray-600">{student?.full_name}</p> */}
