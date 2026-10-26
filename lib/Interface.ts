@@ -78,6 +78,8 @@ export interface SectionAnalysis {
   marksObtained: number;
   maxMarks: number;
   accuracy?: number;
+  rank?: number;
+  percentile?: number;
 }
 
 export interface QuestionAnalysis {
@@ -101,10 +103,6 @@ export interface AttemptAnalysis {
   testName: string;
   score: number;
   maxMarks: number;
-  averageScore?: number;
-  accuracy?: number;
-  rank?: number;
-  percentile?: number;
   startedAt: number;
   endTime: number;
   timeTakenMs: number;

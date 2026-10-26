@@ -58,8 +58,8 @@ function ResultInner() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <Link href="/" className="text-sm font-semibold text-blue-600">
             ← Dashboard
           </Link>
