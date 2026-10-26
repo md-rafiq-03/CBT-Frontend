@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AttemptAnalysisView from "@/components/AttemptAnalysisView";
 import { useAuth } from "@/contexts/AuthContext";
 import { getAttemptAnalysis } from "@/lib/submissionApi";
 import { AttemptAnalysis } from "@/lib/Interface";
-import Link from "next/link";
 
 export default function TestResultPage() {
   return (
@@ -36,19 +36,19 @@ function ResultInner() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <p className="text-slate-600">Loading result...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
       </div>
     );
   }
 
   if (error || !analysis) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-slate-50 p-6">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 p-6">
         <p className="text-red-600">{error || "No analysis found"}</p>
         <button
           onClick={() => router.push("/")}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
         >
           Dashboard
         </button>
@@ -57,20 +57,17 @@ function ResultInner() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-4">
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/"
-            className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold"
-          >
-            Dashboard
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <Link href="/" className="text-sm font-semibold text-blue-600">
+            ← Dashboard
           </Link>
           <Link
             href={`/test/${testId}?mode=review`}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold"
+            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white"
           >
-            Review answers
+            Review solutions
           </Link>
         </div>
         <AttemptAnalysisView analysis={analysis} />

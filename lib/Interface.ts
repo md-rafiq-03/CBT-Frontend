@@ -70,18 +70,19 @@ export interface SubmissionPayload {
 }
 
 export interface SectionAnalysis {
-  section: string;
+  section: Section;
   totalQuestions: number;
   correctCount: number;
   wrongCount: number;
   unansweredCount: number;
   marksObtained: number;
   maxMarks: number;
+  accuracy?: number;
 }
 
 export interface QuestionAnalysis {
   questionId: string;
-  section: string;
+  section: Section;
   type: string;
   stem: string;
   submittedValue: string;
@@ -100,6 +101,10 @@ export interface AttemptAnalysis {
   testName: string;
   score: number;
   maxMarks: number;
+  averageScore?: number;
+  accuracy?: number;
+  rank?: number;
+  percentile?: number;
   startedAt: number;
   endTime: number;
   timeTakenMs: number;
